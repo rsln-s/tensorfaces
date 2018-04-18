@@ -16,11 +16,11 @@ num_exs = num_exs(2);
 num_people = size(imfiles') ./ (size(vps) .* size(ills) .* size(exs));
 num_people = num_people(2)
 
-initial_tensor = uint8.empty(0, num_vps, num_ills, num_exs, assumed_size_flattened);
+initial_tensor = double.empty(0, num_vps, num_ills, num_exs, assumed_size_flattened);
 
 people = {};
 for file = imfiles'
-    imdata = imread(strcat('subset/', file.name));
+    imdata = im2double(imread(strcat('subset/', file.name)));
     disp(strcat('Importing: ',file.name))
     if ~isequal(size(imdata), assumed_size_of_image)
         disp('Error: image of incorrect size encountered')
@@ -54,16 +54,21 @@ for file = imfiles'
     
     flattened_imdata = imdata(imdata~=0);
     if ~isequal(size(flattened_imdata), [assumed_size_flattened, 1])
+        size(flattened_imdata)
         disp('Error: incorrect mask')
         return
     end
     initial_tensor(person_ind, vp, ill, ex, :) = flattened_imdata;
 end
+
+size(initial_tensor)
+[U, S, sv] = mlsvd(initial_tensor);
+
 [row,col,v] = find(imdata);
 outmat = zeros(size(imdata), 'like', imdata);
+tensorface = U{5};
+tensorface = tensorface(:,5)
 for k = 1 : length(row)
-    outmat(row(k),col(k)) = initial_tensor(2, 2, 1, 1, k);
+    outmat(row(k),col(k)) = - 40 * tensorface(k);
 end
 imshow(outmat)
-
-% size(initial_tensor)
