@@ -52,12 +52,18 @@ for file = imfiles'
     ill = str2num(char(strids{2})) + 1;
     ex = str2num(char(strids{3})) - 1; % because expecting only one expression
     
-    flattened_imdata = reshape(imdata, 1, []);
-    flattened_imdata = flattened_imdata(flattened_imdata ~= 0);
-    if ~isequal(size(flattened_imdata), [1, assumed_size_flattened])
+    flattened_imdata = imdata(imdata~=0);
+    if ~isequal(size(flattened_imdata), [assumed_size_flattened, 1])
         disp('Error: incorrect mask')
         return
     end
     initial_tensor(person_ind, vp, ill, ex, :) = flattened_imdata;
 end
-size(initial_tensor)
+[row,col,v] = find(imdata);
+outmat = zeros(size(imdata), 'like', imdata);
+for k = 1 : length(row)
+    outmat(row(k),col(k)) = initial_tensor(2, 2, 1, 1, k);
+end
+imshow(outmat)
+
+% size(initial_tensor)
