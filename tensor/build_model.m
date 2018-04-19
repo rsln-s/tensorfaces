@@ -1,4 +1,4 @@
-dirpath = 'subset/*.png';
+dirpath = 'FaceBase_warped/*.png';
 assumed_size_of_image = [110,115];
 assumed_size_flattened = 8830;
 vps = [0,1,2,3,4];
@@ -20,7 +20,7 @@ initial_tensor = double.empty(0, num_vps, num_ills, num_exs, assumed_size_flatte
 
 people = {};
 for file = imfiles'
-    imdata = im2double(imread(strcat('subset/', file.name)));
+    imdata = im2double(imread(strcat('FaceBase_warped/', file.name)));
     disp(strcat('Importing: ',file.name))
     if ~isequal(size(imdata), assumed_size_of_image)
         disp('Error: image of incorrect size encountered')
@@ -53,6 +53,7 @@ for file = imfiles'
     ex = str2num(char(strids{3})) - 1; % because expecting only one expression
     
     flattened_imdata = imdata(imdata~=0);
+    flattened_imdata = flattened_imdata / norm(flattened_imdata);
     if ~isequal(size(flattened_imdata), [assumed_size_flattened, 1])
         size(flattened_imdata)
         disp('Error: incorrect mask')
@@ -63,12 +64,3 @@ end
 
 size(initial_tensor)
 [U, S, sv] = mlsvd(initial_tensor);
-
-[row,col,v] = find(imdata);
-outmat = zeros(size(imdata), 'like', imdata);
-tensorface = U{5};
-tensorface = tensorface(:,5)
-for k = 1 : length(row)
-    outmat(row(k),col(k)) = - 40 * tensorface(k);
-end
-imshow(outmat)
